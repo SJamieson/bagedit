@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import sys
-import roslib; roslib.load_manifest('bagedit')
+import roslib;
+from typing import Any, Union
+
+roslib.load_manifest('bagedit')
 import rospy
 import rosbag
 from rospy import rostime
@@ -18,7 +21,7 @@ def parse_args():
     parser.add_argument('-i', help='reindex bagfile', 
         default = False, action="store_true")
     parser.add_argument('main_bagfile', type=str, help='path to a bagfile, which will be the main bagfile')
-    parser.add_argument('bagfile', type=str, help='path to a bagfile which should be merged to the main bagfile')
+    parser.add_argument('bagfiles', nargs='+', type=str, help='path to the bagfile(s) which should be merged to the main bagfile')
     args = parser.parse_args()
     return args
 
@@ -37,11 +40,11 @@ def get_next(bag_iter, reindex = False,
     except StopIteration:
         return None
 
-def merge_bag(main_bagfile, bagfile, outfile = None, topics = None, 
+def merge_bag(main_bagfile, bagfiles, outfile = None, topics = None,
         reindex = True):
     #get min and max time in bagfile
     main_limits = get_limits(main_bagfile)
-    limits = get_limits(bagfile)
+    limits = [get_limits(bagfile) for bagfile in bagfiles]
     #check output file
     if outfile == None:
         pattern = main_bagfile + "_merged_%i.bag"
@@ -57,23 +60,32 @@ def merge_bag(main_bagfile, bagfile, outfile = None, topics = None,
     #merge bagfile
     outbag = rosbag.Bag(outfile, 'w')
     main_bag = rosbag.Bag(main_bagfile).__iter__()
-    bag = rosbag.Bag(bagfile).__iter__()
-    main_next = get_next(main_bag)
-    next = get_next(bag, reindex, main_limits[0], limits[0], topics)
+    bags = [rosbag.Bag(bagfile).__iter__() for bagfile in bagfiles]
+    next = [get_next(main_bag)] + [get_next(bags[i], reindex, main_limits[0], limits[i][0], topics) for i in range(len(bagfiles))]
+    def find_next(next):
+        i = 0
+        next_time = next[0][2].to_sec() if next[0] is not None else float('inf')
+        for n in range(1, len(next)):
+            if next[n] is None:
+                continue
+            test_time = next[n][2].to_sec()
+            if test_time < next_time:
+                i = n
+                next_time = test_time
+        return i, next_time
+    def update_next(next, i):
+        if i == 0:
+            next[0] = get_next(main_bag)
+        else:
+            print(len(next), len(limits), i)
+            next[i] = get_next(bags[i-1], reindex, main_limits[0], limits[i-1][0], topics)
     try:
-        while main_next != None or next != None:
-            if main_next == None:
-                outbag.write(next[0], next[1], next[2])
-                next = get_next(bag, reindex, main_limits[0], limits[0], topics)
-            elif next == None:
-                outbag.write(main_next[0], main_next[1], main_next[2])
-                main_next = get_next(main_bag)
-            elif next[2] < main_next[2]:
-                outbag.write(next[0], next[1], next[2])
-                next = get_next(bag, reindex, main_limits[0], limits[0], topics)
-            else:
-                outbag.write(main_next[0], main_next[1], main_next[2])
-                main_next = get_next(main_bag)
+        next_i, next_time = find_next(next)  # type: (int, Union[float, rostime.Time])
+        # print(type(next_time))
+        while next_time < float('inf'):
+            outbag.write(next[next_i][0], next[next_i][1], next[next_i][2])
+            update_next(next, next_i)
+            next_i, next_time = find_next(next)
     finally:
         outbag.close()
 
@@ -95,7 +107,7 @@ if __name__ == "__main__":
     if args.t != None:
         args.t = args.t.split(',')
     merge_bag(args.main_bagfile, 
-        args.bagfile, 
+        args.bagfiles,
         outfile = args.o,
         topics = args.t,
         reindex = args.i)
