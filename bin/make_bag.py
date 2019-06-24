@@ -83,7 +83,7 @@ def GetFilesFromDir(dir):
 #     finally:
 #         bag.close()
 
-def CreateMonoBag(imgs, bagname, time_format=None):
+def CreateMonoBag(imgs, bagname, time_format=None, scale=1.):
     '''Creates a bag file with camera images'''
     bag =rosbag.Bag(bagname, 'w', compression=rosbag.Compression.BZ2, chunk_threshold=32 * 1024 * 1024)
     bridge = CvBridge()
@@ -113,6 +113,9 @@ def CreateMonoBag(imgs, bagname, time_format=None):
                 colour16 = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR)  # type: np.ndarray
                 # print(colour16.shape)
 
+                if scale != 1.:
+                    colour16 = cv2.resize(colour16, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+
                 Img = bridge.cv2_to_imgmsg((colour16/256).astype('uint8'), "bgr8")
                 # Img = Image()
                 Img.header.stamp = Stamp
@@ -127,7 +130,7 @@ def CreateMonoBag(imgs, bagname, time_format=None):
         bag.close()
 
 
-def CreateBag(image_dir, bagname, time_format=None):
+def CreateBag(image_dir, bagname, time_format=None, scale=1.):
     '''Creates the actual bag file by successively adding images'''
     all_imgs, left_imgs, right_imgs = GetFilesFromDir(image_dir)
     if len(all_imgs) <= 0:
@@ -136,13 +139,15 @@ def CreateBag(image_dir, bagname, time_format=None):
 
     if len(left_imgs) > 0 and len(right_imgs) > 0:
         # create bagfile with stereo camera image pairs
-        CreateStereoBag(left_imgs, right_imgs, bagname, time_format=time_format)
+        # CreateStereoBag(left_imgs, right_imgs, bagname, time_format=time_format)
+        raise NotImplementedError("Disabled")
     else:
         # create bagfile with mono camera image stream
-        CreateMonoBag(all_imgs, bagname, time_format=time_format)
+        CreateMonoBag(all_imgs, bagname, time_format=time_format, scale=scale)
+
 
 if __name__ == "__main__":
     if len( sys.argv ) >= 3:
         CreateBag(*sys.argv[1:])
     else:
-        print( "Usage: img2bag imagedir bagfilename")
+        print( "Usage: img2bag imagedir bagfilename <time_format> <scale>")
