@@ -6,7 +6,7 @@ import rosbag
 from PIL import Image as PILImage
 import rospy
 from tqdm import tqdm
-from roslz4._roslz4 import LZ4Compressor
+from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
@@ -88,7 +88,7 @@ def CreateMonoBag(imgs, bagname, time_format=None, scale=1.):
     bag =rosbag.Bag(bagname, 'w', compression=rosbag.Compression.BZ2, chunk_threshold=32 * 1024 * 1024)
     bridge = CvBridge()
     try:
-        for image_name in tqdm(imgs):
+        for image_name, i in enumerate(tqdm(imgs)):
             # print("Adding %s" % image_name)
 
             Stamp = None
@@ -116,13 +116,14 @@ def CreateMonoBag(imgs, bagname, time_format=None, scale=1.):
                 if scale != 1.:
                     colour16 = cv2.resize(colour16, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
 
-                Img = bridge.cv2_to_imgmsg((colour16/256).astype('uint8'), "bgr8")
+                Img = bridge.cv2_to_imgmsg((colour16/256).astype('uint8'), "bgr8")  # type: Image
                 # Img = Image()
                 Img.header.stamp = Stamp
                 # Img.width = imrows
                 # Img.height = imcols
                 # Img.encoding = "rgb8"
                 Img.header.frame_id = "camera"
+                Img.header.seq = i
                 # Img.data = [pix for pixdata in colour for pix in pixdata]
 
                 bag.write('camera/image_raw', Img, Stamp)
