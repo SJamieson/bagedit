@@ -1,10 +1,7 @@
 #!/usr/bin/env python
-import sys
-import roslib;
-from typing import Any, Union
+import roslib
 
 roslib.load_manifest('bagedit')
-import rospy
 import rosbag
 from rospy import rostime
 from tqdm import tqdm
@@ -85,6 +82,7 @@ def merge_bag(main_bagfile, bagfiles, outfile=None, topics=None, compression=ros
         bags[-1]._open_read(bags[-1]._filename, False)
         bags[-1] = bags[-1].__iter__()
     next = [None] * len(bagfiles)
+
     def find_next(next):
         i = 0
         next_time = float('inf')
@@ -102,6 +100,7 @@ def merge_bag(main_bagfile, bagfiles, outfile=None, topics=None, compression=ros
             next[0] = get_next(bags[i])
         else:
             next[i] = get_next(bags[i], reindex, limits[0], limits[i][0], topics)
+
     for i in range(len(bagfiles)):
         update_next(next, i)
     try:
