@@ -109,22 +109,15 @@ def CreateMonoBag(imgs, bagname, time_format=None, scale=1.):
 
             with open(image_name, "rb") as rawimage:
                 img = np.fromfile(rawimage, np.dtype('u2'), imsize).reshape((imrows, imcols))
-                # print(img.shape)
-                colour16 = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR)  # type: np.ndarray
-                # print(colour16.shape)
+                colour = cv2.cvtColor(img, cv2.COLOR_BAYER_GB2BGR)  # type: np.ndarray
 
                 if scale != 1.:
-                    colour16 = cv2.resize(colour16, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+                    colour = cv2.resize(colour, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
 
-                Img = bridge.cv2_to_imgmsg((colour16/256).astype('uint8'), "bgr8")  # type: Image
-                # Img = Image()
+                Img = bridge.cv2_to_imgmsg((colour/256).astype('uint8'), "rgb8")  # type: Image
                 Img.header.stamp = Stamp
-                # Img.width = imrows
-                # Img.height = imcols
-                # Img.encoding = "rgb8"
                 Img.header.frame_id = "camera"
                 Img.header.seq = i
-                # Img.data = [pix for pixdata in colour for pix in pixdata]
 
                 bag.write('camera/image_raw', Img, Stamp)
     finally:
