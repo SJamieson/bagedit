@@ -125,8 +125,12 @@ def merge_bag(main_bagfile, bagfiles, outfile=None, topics=None, compression=ros
 def get_limits(bagfile, validate=False):
     print "Determine start and end index of %s..." % bagfile
     bag = rosbag.Bag(bagfile, 'r', skip_index=True)
-    start_time = bag.get_start_time()
-    end_time = bag.get_end_time()
+    try:
+        start_time = bag.get_start_time()
+        end_time = bag.get_end_time()
+    except:
+        start_time = float("-inf")
+        end_time = float("inf")
     if validate:
         _end_time = None
         _start_time = None

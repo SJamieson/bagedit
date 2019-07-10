@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Adapted from the work of Alexander Kasper at http://answers.ros.org/question/11537/creating-a-bag-file-out-of-a-image-sequence/?answer=173665#post-id-173665
 
 import time, sys, os, datetime
