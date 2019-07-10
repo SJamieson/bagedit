@@ -89,7 +89,7 @@ def CreateMonoBag(imgs, bagname, time_format=None, scale=1.):
     bag =rosbag.Bag(bagname, 'w', compression=rosbag.Compression.BZ2, chunk_threshold=32 * 1024 * 1024)
     bridge = CvBridge()
     try:
-        for image_name, i in enumerate(tqdm(imgs)):
+        for i, image_name in enumerate(tqdm(imgs)):
             # print("Adding %s" % image_name)
 
             Stamp = None
@@ -138,7 +138,7 @@ def CreateBag(image_dir, bagname, time_format=None, scale=1.):
         raise NotImplementedError("Disabled")
     else:
         # create bagfile with mono camera image stream
-        CreateMonoBag(all_imgs, bagname, time_format=time_format, scale=scale)
+        CreateMonoBag(all_imgs, bagname, time_format=time_format, scale=float(scale))
 
 
 if __name__ == "__main__":
