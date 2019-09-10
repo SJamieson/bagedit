@@ -17,7 +17,7 @@ rosrun bagedit bagtrim.py --help
 rosrun bagedit bagmerge.py --help
 ```
 
-# bagedit 
+# bagtrim
 ```
 usage: bagtrim.py [-h] [-s start_time] [-e end_time] [-o output_file] [-a]
                   bagfile
@@ -35,7 +35,7 @@ optional arguments:
   -a              use absolute timestamps
 ```
 
-# bagedit 
+# bagmerge
 ```
 usage: bagmerge.py [-h] [-o output_file] [-t topics] [-i] main_bagfile bagfile
 
@@ -50,4 +50,20 @@ optional arguments:
   -o output_file  name of the output file
   -t topics       topics which should be merged to the main bag
   -i              reindex bagfile
+```
+
+# make_bag
+```
+usage: make_bag.py image_dir bag_filename is_bayered [time_format] [scale=1]
+
+Merges two bagfiles.
+
+positional arguments:
+  image_dir            directory which contains images
+  bag_filename         name of output bagfile
+  is_bayered           true if the input images need to be debayered, false otherwise
+
+optional arguments:
+  time_format          at the moment, only supports being unset or equal to "name.date.time.n.ext" if that is the filename format of the input images; if so, will set timestamp of each message accordingly
+  scale                scales input images in both dimensions by a constant factor, using cubic interpolation
 ```
