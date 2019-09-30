@@ -52,11 +52,11 @@ optional arguments:
   -i              reindex bagfile
 ```
 
-# make_bag
+# img2bag 
 ```
-usage: make_bag.py image_dir bag_filename is_bayered [time_format] [scale=1]
+usage: img2bag.py image_dir bag_filename is_bayered [time_format] [scale=1]
 
-Merges two bagfiles.
+Creates a bagfile out of a directory of images.
 
 positional arguments:
   image_dir            directory which contains images

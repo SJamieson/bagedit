@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# Adapted from the work of Alexander Kasper at http://answers.ros.org/question/11537/creating-a-bag-file-out-of-a-image-sequence/?answer=173665#post-id-173665
+# Adapted from the work of Alexander Kasper at
+# http://answers.ros.org/question/11537/creating-a-bag-file-out-of-a-image-sequence/?answer=173665#post-id-173665
 
 import cv2
 import datetime
@@ -165,7 +166,7 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4:
         CreateBag(*sys.argv[1:])
     else:
-        print("Usage: img2bag imagedir bagfilename bayered <time_format> <scale>")
+        print("Usage: img2bag.py imagedir bagfilename bayered <time_format> <scale>")
     if len(sys.argv) == 3:
         print(sys.argv[2], strtobool(sys.argv[2]))
         img = LoadImage(sys.argv[1], 1., debayer=strtobool(sys.argv[2]))
