@@ -37,13 +37,13 @@ optional arguments:
 
 # bagmerge
 ```
-usage: bagmerge.py [-h] [-o output_file] [-t topics] [-i] main_bagfile bagfile
+usage: bagmerge.py [-h] [-o output_file] [-t topics] [-i] main_bagfile bagfile...
 
 Merges two bagfiles.
 
 positional arguments:
-  main_bagfile    path to a bagfile, which will be the main bagfile
-  bagfile         path to a bagfile which should be merged to the main bagfile
+  main_bagfile    path to the bagfile that will be the main bagfile
+  bagfile...         path to bagfile(s) that should be merged to the main bagfile
 
 optional arguments:
   -h, --help      show this help message and exit
@@ -66,4 +66,15 @@ positional arguments:
 optional arguments:
   time_format          at the moment, only supports being unset or equal to "name.date.time.n.ext" if that is the filename format of the input images; if so, will set timestamp of each message accordingly
   scale                scales input images in both dimensions by a constant factor, using cubic interpolation
+```
+
+# nav2bag
+```
+usage: nav2bag.py navigation_mat bag_filename
+
+Creates a bagfile out of a matfile containing timestamped locations (latitude and longitude).
+
+positional arguments:
+  navigation_mat       matfile containing the location data
+  bag_filename         name of output bagfile
 ```

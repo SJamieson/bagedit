@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import roslib
 
-roslib.load_manifest('bagedit')
+# roslib.load_manifest('bagedit')
 import rosbag
 from rospy import rostime
 from tqdm import tqdm

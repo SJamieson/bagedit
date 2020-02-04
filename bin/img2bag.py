@@ -120,26 +120,38 @@ def CreateMonoBag(imgs, bagname, time_format=None, scale=1., bayered=False):
     bag = rosbag.Bag(bagname, 'w', compression=rosbag.Compression.BZ2, chunk_threshold=32 * 1024 * 1024)
     bridge = CvBridge()
     try:
-        for i, image_name in enumerate(tqdm(imgs)):
-            # print("Adding %s" % image_name)
+        for i, image_path in enumerate(tqdm(imgs)):
+            # print("Adding %s" % image_path)
 
-            Stamp = None
-            if time_format is None:
-                Stamp = rospy.rostime.Time.from_sec(time.time())
-            elif time_format == "name.date.time.n.ext":
-                tokens = image_name.split('.')
-                bag_stamp = datetime.datetime.strptime(':'.join(tokens[1:3]), "%Y%m%d:%H%M%S%f")
-                Stamp = rospy.rostime.Time(secs=int(time.mktime(bag_stamp.timetuple())),
-                                           nsecs=bag_stamp.microsecond * 1000)
-                # print(time.mktime(bag_stamp.timetuple()))
-                # print(bag_stamp.second, bag_stamp.microsecond*1E3)
+            try:
+                Stamp = None
+                image_name = os.path.basename(image_path)
+                if time_format is None or time_format == "":
+                    Stamp = rospy.rostime.Time.from_sec(1574283415 + i)
+                elif time_format == "name.date.time.n.ext" or time_format == "sentry503":
+                    # format is name.date.time.n.ext where time is hours/minutes/seconds/microseconds
+                    tokens = image_name.split('.')
+                    bag_stamp = datetime.datetime.strptime(':'.join(tokens[1:3]), "%Y%m%d:%H%M%S%f")
+                    Stamp = rospy.rostime.Time(secs=int(time.mktime(bag_stamp.timetuple())),
+                                               nsecs=int(bag_stamp.microsecond * 1E3))
+                    # print(time.mktime(bag_stamp.timetuple()))
+                    # print(bag_stamp.second, bag_stamp.microsecond*1E3)
+                elif time_format == "201504_Panama":
+                    # format is date.time.ms.n.ext where time is hours/minutes/seconds and ms is milliseconds
+                    tokens = image_name.split('.')
+                    bag_stamp = datetime.datetime.strptime(':'.join(tokens[:2]), "%Y%m%d:%H%M%S")
+                    Stamp = rospy.rostime.Time(secs=int(time.mktime(bag_stamp.timetuple())),
+                                               nsecs=int(int(tokens[2]) * 1E6))
 
-            img = LoadImage(image_name, scale, debayer=bayered)
+                img = LoadImage(image_path, scale, debayer=bayered)
 
-            ImgMsg = bridge.cv2_to_imgmsg(img, "rgb8")  # type: Image
-            ImgMsg.header.stamp = Stamp
-            ImgMsg.header.frame_id = "camera"
-            ImgMsg.header.seq = i
+                ImgMsg = bridge.cv2_to_imgmsg(img, "rgb8")  # type: Image
+                ImgMsg.header.stamp = Stamp
+                ImgMsg.header.frame_id = "camera"
+                ImgMsg.header.seq = i
+            except ValueError:
+                print("WARNING: Failed to process file %s" % image_path)
+                continue
 
             bag.write('camera/image_raw', ImgMsg, Stamp)
     finally:
