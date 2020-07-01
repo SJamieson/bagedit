@@ -20,8 +20,8 @@ def save_images(bag, topics, output_dir):
     for topic, msg, t in bag.read_messages(topics=topics):
         cv_img = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
 
-        cv2.imwrite(os.path.join(output_dir, "%s-%06i.png" %
-                                 (topic[1:].replace("/", "."), count[topics.index(topic)])), cv_img)
+        cv2.imwrite(os.path.join(output_dir, "%06i-%s.png" %
+                                 (count[topics.index(topic)], topic[1:].replace("/", "."))), cv_img)
         count[topics.index(topic)] += 1
 
     bag.close()
