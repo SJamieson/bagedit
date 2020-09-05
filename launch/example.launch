@@ -1,6 +1,0 @@
-<launch>
-
-  <!--<node pkg="bagedit" type="publisher_node.py" name="publisher_node" output="screen">
-  </node>-->
-
-</launch>

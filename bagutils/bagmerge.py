@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-import roslib
-
-# roslib.load_manifest('bagedit')
 import rosbag
 from rospy import rostime
 from tqdm import tqdm
@@ -67,8 +64,8 @@ def merge_bag(main_bagfile, bagfiles, outfile=None, topics=None, compression=ros
             index += 1
     # output some information
     # print "merge bag %s in %s" % (bagfile, main_bagfile)
-    print "topics filter: ", topics
-    print "writing to %s." % outfile
+    print("topics filter: ", topics)
+    print("writing to %s." % outfile)
     # merge bagfile
     outbag = rosbag.Bag(outfile, 'w', compression=compression, chunk_threshold=32 * 1024 * 1024)
     bags = []
@@ -123,7 +120,7 @@ def merge_bag(main_bagfile, bagfiles, outfile=None, topics=None, compression=ros
 
 
 def get_limits(bagfile, validate=False):
-    print "Determine start and end index of %s..." % bagfile
+    print("Determine start and end index of %s..." % bagfile)
     bag = rosbag.Bag(bagfile, 'r', skip_index=True)
     try:
         start_time = bag.get_start_time()
