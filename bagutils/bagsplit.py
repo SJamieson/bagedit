@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 import rosbag
-from rospy import rostime, Time
+from rospy import Time
 from tqdm import tqdm
-from bagmerge import get_limits, get_next
+from bagmerge import get_limits
 import argparse
 import os
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        prog='bagmerge.py',
-        description='Merges two bagfiles.')
+        prog='bagsplit.py',
+        description='Splits a bagfile.')
     parser.add_argument('-o', type=str, help='name of the output file -- should include two "%i"s',
                         default=None, metavar="output_file")
     parser.add_argument('-t', type=str, help='topics which should be included',

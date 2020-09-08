@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rosbag
-from rospy import rostime
+from rospy import rostime, Time
 from tqdm import tqdm
 import argparse
 import os
@@ -33,10 +33,10 @@ def get_next(bag_iter, reindex=False,
     :type bag_iter: rosbag.Bag
     """
     try:
-        result = bag_iter.next()
+        result = next(bag_iter)
         if topics != None:
             while not result[0] in topics:
-                result = bag_iter.next()
+                result = next(bag_iter)
         if reindex:
             return (result[0], result[1],
                     result[2] - start_time + main_start_time)
@@ -75,9 +75,7 @@ def merge_bag(main_bagfile, bagfiles, outfile=None, topics=None, compression=ros
             bags.append(None)
             continue
         bags.append(rosbag.Bag(bagfiles[i], 'r', skip_index=False, chunk_threshold=8 * 1024 * 1024))
-        bags[-1].close()
-        bags[-1]._open_read(bags[-1]._filename, False)
-        bags[-1] = bags[-1].__iter__()
+        bags[-1] = bags[-1].read_messages(topics, Time.from_sec(start_limit), Time.from_sec(end_limit), None, True, False)
     next = [None] * len(bagfiles)
 
     def find_next(next):
@@ -107,7 +105,7 @@ def merge_bag(main_bagfile, bagfiles, outfile=None, topics=None, compression=ros
         next_i, next_time = find_next(next)  # type: (int, Union[float, rostime.Time])
         while next_time <= end_limit:
             if next_time >= start_limit:
-                outbag.write(next[next_i][0], next[next_i][1], next[next_i][2])
+                outbag.write(next[next_i][0], next[next_i][1], next[next_i][2], raw=True)
                 progress.update(max(0, next_time - prev_time))
                 if prev_time > next_time:
                     print("Prev time:", str(prev_time), "Next time:", str(next_time))
